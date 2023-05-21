@@ -1,29 +1,27 @@
 #!/usr/bin/env python3
 
 import json
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 from zoneinfo import ZoneInfo
 
 import requests
-from cachetools.func import ttl_cache
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
 
 UV_URL = "https://www.meteo.be/fr/meteo/observations/indice-uv"
-DEFAULT_TZ = "Europe/Brussels"
 
 
+@dataclass(init=False)
 class UvDataPoint:
     SAFE_EXPOSURE_FACTORS = (2.5, 3, 4, 5, 8, 15)
+    instant: datetime
+    uv_index: float
 
     def __init__(self, raw_data_point: dict[str, Any]):
         timestamp: int = raw_data_point["UNIX_TIMESTAMP"]
         uv_index: float = raw_data_point["UV_INDEX"]
-        try:
-            tz = ZoneInfo(settings.TIME_ZONE)
-        except ImproperlyConfigured:
-            tz = ZoneInfo(DEFAULT_TZ)
+        tz = ZoneInfo(settings.TIME_ZONE) if settings.USE_TZ else None
         self.instant = datetime.fromtimestamp(timestamp, tz=tz)
         self.uv_index = uv_index
 
@@ -53,7 +51,6 @@ class UvDataEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-@ttl_cache
 def fetch_raw() -> list[UvDataPoint]:
     req = requests.get(UV_URL)
     req.raise_for_status()
@@ -67,6 +64,15 @@ def fetch_raw() -> list[UvDataPoint]:
     return forecast_data
 
 
-if __name__ == "__main__":
-    data = fetch_raw()
-    print(json.dumps(data, indent=2, cls=UvDataEncoder))
+def get_current():
+    points = fetch_raw()
+    tz = ZoneInfo(settings.TIME_ZONE) if settings.USE_TZ else None
+    now = datetime.now(tz=tz)
+    previous = None
+    for point in points:
+        current = point
+        if now < current.instant:
+            current = previous
+            break
+        previous = current
+    return current
