@@ -6,6 +6,7 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 import requests
+from cachetools.func import ttl_cache
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
@@ -52,6 +53,7 @@ class UvDataEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
+@ttl_cache
 def fetch_raw() -> list[UvDataPoint]:
     req = requests.get(UV_URL)
     req.raise_for_status()
