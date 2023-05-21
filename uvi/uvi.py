@@ -9,7 +9,7 @@ from django.conf import settings
 UV_URL = "https://www.meteo.be/fr/meteo/observations/indice-uv"
 
 
-def fetch() -> list[dict[str, Any]]:
+def fetch_raw() -> list[dict[str, Any]]:
     req = requests.get(UV_URL)
     req.raise_for_status()
     forecast_data_raw = [
@@ -22,5 +22,5 @@ def fetch() -> list[dict[str, Any]]:
 
 
 if __name__ == "__main__":
-    data = fetch()
+    data = fetch_raw()
     print(json.dumps(data, indent=2))
