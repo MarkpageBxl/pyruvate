@@ -1,5 +1,5 @@
 """
-WSGI config for pyrite project.
+WSGI config for pyruvate project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "pyrite.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "pyruvate.settings")
 
 application = get_wsgi_application()
