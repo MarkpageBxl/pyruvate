@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import json
-from typing import List
+from typing import Any
 
 import requests
 from django.conf import settings
@@ -9,14 +9,15 @@ from django.conf import settings
 UV_URL = "https://www.meteo.be/fr/meteo/observations/indice-uv"
 
 
-def fetch():
+def fetch() -> list[dict[str, Any]]:
     req = requests.get(UV_URL)
     req.raise_for_status()
     forecast_data_raw = [
         line.strip() for line in req.text.split("\n") if "var fc_data =" in line
     ][0]
-    forecast_data_raw = forecast_data_raw.split("=", maxsplit=1)[1][:-1]
-    forecast_data = json.loads(forecast_data_raw)
+    forecast_data_raw = forecast_data_raw.split("=", maxsplit=1)[1]
+    forecast_data_raw = forecast_data_raw[: forecast_data_raw.index(";")]
+    forecast_data: list[dict[str, Any]] = json.loads(forecast_data_raw)
     return forecast_data
 
 
