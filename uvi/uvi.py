@@ -53,11 +53,9 @@ class UvDataEncoder(json.JSONEncoder):
 
 
 def fetch_raw() -> list[UvDataPoint]:
-    cached_value = cache.get('uv_data')
+    cached_value = cache.get("uv_data")
     if cached_value:
-        print('Cache hit')
         return cached_value
-    print('Cache miss')
     req = requests.get(UV_URL)
     req.raise_for_status()
     forecast_data_raw = [
@@ -67,7 +65,7 @@ def fetch_raw() -> list[UvDataPoint]:
     forecast_data_raw = forecast_data_raw[: forecast_data_raw.index(";")]
     forecast_data_raw = json.loads(forecast_data_raw)
     forecast_data = [UvDataPoint(x) for x in forecast_data_raw]
-    cache.set('uv_data', forecast_data)
+    cache.set("uv_data", forecast_data)
     return forecast_data
 
 
