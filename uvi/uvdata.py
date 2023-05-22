@@ -73,7 +73,8 @@ def get_current():
     points = fetch_raw()
     tz = ZoneInfo(settings.TIME_ZONE) if settings.USE_TZ else None
     now = datetime.now(tz=tz)
-    previous = None
+    current = points[0]
+    previous = current
     for point in points:
         current = point
         if now < current.instant:
